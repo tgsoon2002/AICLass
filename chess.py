@@ -1142,7 +1142,7 @@ class ChessGame(object):
         gameTurns = 0
         # Draw the board
         
-        self.drawBoafrd()
+        self.drawBoard()
 
         while gameTurns < nTurns:
             # Current Player Make the move
@@ -1153,11 +1153,11 @@ class ChessGame(object):
                 gameTurns += 1
 
             # Just print a message
-            if  self.players[self.curr].name == "PlayerXAI"
-                msg = "Turn : " + str(gameTurns) + " : "
-                msg += self.players[self.curr].name + " move " + move
-                print (msg)
-                logging.info(msg)
+            #if  self.players[self.curr].name == 'PlayerXAI''
+            msg = "Turn : " + str(gameTurns) + " : "
+            msg += self.players[self.curr].name + " move " + move
+            print (msg)
+            logging.info(msg)
 
             # Refresh the board after a move
             self.drawBoard()
@@ -1217,24 +1217,28 @@ class ChessGame(object):
 # playerY
 ###############################################################################
 def parseTestCase(line):
-    regexPattern = r'([xy]\.[RK]\([1-8],[1-8]\))'
+     regexPattern = r'([XY]\:[RNK]\:[a-h][1-8])'
     listPieces = re.findall(regexPattern, line)
-
     xList = {}
     yList = {}
+    
     for item in listPieces:
-        # Item is expected to be in the format of 'x.K(5,6)'
+            
+            # Item is expected to be in the format of 'x.K(5,6)'
         player = item[0]
         pieceName = item[2]
-        coord = ( int(item[4]), int(item[6]) )
+        column = ord(item[4])-96
+        coord = ( column, int(item[5]) )
+        
+        # check if corrdinate is valid
         if (coord[0] < 1 or coord[0] > 8) and (coord[1] < 1 or coord[1] > 8):
             print ("Invalid coordinate from test File. "), item
             sys.exit()
-
-        if pieceName.upper() not in ['K','R']:
+        #check if piece is valid
+        if pieceName.upper() not in ['K','R','N']:
             print ("Invalid Piece Name "), item
             sys.exit()
-
+        # add piece to right list
         if player.upper() == 'X':
             xList[coord] = pieceName.upper()
         elif player.upper() == 'Y':
@@ -1242,7 +1246,54 @@ def parseTestCase(line):
         else:
             print ("Invalid testCase format expected 'x.K(5,6)' "), item
             sys.exit()
+        print(xList)
 
+    #--------------------------------------------------------------------------
+    # Helper function to read text file to get what opponent run
+    #--------------------------------------------------------------------------
+#def readTextFile(self, gameTurn):  
+    # if  self.players[self.curr].name == "PlayerXAI"
+    #     fileName = "log_Y.txt"
+    #     readMove = open(fileName)
+    #     ReadOponentMove(readMove[gameTurn])
+    # else
+    #     fileName = "log_X.txt"
+    #     readMove = open(fileName)
+
+#---------
+# helper fucntion to read the file and setn back the right type.    
+
+def ReadOponentMove(line):
+    regexPattern = r'([XY]\:[RNK]\:[a-h][1-8])'
+    listPieces = re.findall(regexPattern, line)
+    xList = {}
+    yList = {}
+    
+    for item in listPieces:
+            
+            # Item is expected to be in the format of 'x.K(5,6)'
+        player = item[0]
+        pieceName = item[2]
+        column = ord(item[4])-96
+        coord = ( column, int(item[5]) )
+        
+        # check if corrdinate is valid
+        if (coord[0] < 1 or coord[0] > 8) and (coord[1] < 1 or coord[1] > 8):
+            print ("Invalid coordinate from test File. "), item
+            sys.exit()
+        #check if piece is valid
+        if pieceName.upper() not in ['K','R','N']:
+            print ("Invalid Piece Name "), item
+            sys.exit()
+        # add piece to right list
+        if player.upper() == 'X':
+            xList[coord] = pieceName.upper()
+        elif player.upper() == 'Y':
+            yList[coord] = pieceName.lower()
+        else:
+            print ("Invalid testCase format expected 'x.K(5,6)' "), item
+            sys.exit()
+        print(xList)
     return xList, yList
 
 def setNumOfTurns():
@@ -1267,11 +1318,12 @@ def main():
 
     answer = input("Is this a test? (y/n)") #renamed to input from raw_input
     if answer.upper() == 'Y':
-        fileName = "testCase.txt"
+        fileName = "testCase2.txt"
         testData = open(fileName)
         gameNum = 1
         for line in testData:                        
-            xPieces, yPieces = parseTestCase(line)
+            xPieces, yPieces = parseTestCase(line) #parseTestCase(line) 
+            
             if len(xPieces) == 0 or len(yPieces) == 0:
                 print ("Problem with testCase data.  Unable to parse it")
                 print ("Expect testCase data in format: x.K(8,7),x.R(8,8),y.K(6,5)")
@@ -1335,41 +1387,6 @@ def main():
         nTurns = setNumOfTurns()
         newGame.play(nTurns)
 
-    def readTextFile(self, gameTurn):
-        if  self.players[self.curr].name == "PlayerXAI"
-            fileName = "log_Y.txt"
-            readMove = open(fileName)
-            ReadOponentMove(    readMove[gameTurn])
-        else
-            fileName = "log_X.txt"
-            readMove = open(fileName)
-
-    def ReadOponentMove(line):
-        regexPattern = r'([XY]\:[RNK]\([1-8],[a-h]\))'
-        listPieces = re.findall(regexPattern, line)
-        for item in listPieces
-             # Item is expected to be in the format of 'x.K(5,6)'
-            player = item[0]
-            pieceName = item[2]
-            column = ord(item[4])
-            coord = ( column-1, int(item[5]) )
-            if (coord[0] < 1 or coord[0] > 8) and (coord[1] < 1 or coord[1] > 8):
-                print ("Invalid coordinate from test File. "), item
-                sys.exit()
-
-            if pieceName.upper() not in ['K','R']:
-                print ("Invalid Piece Name "), item
-                sys.exit()
-
-            if player.upper() == 'X':
-                xList[coord] = pieceName.upper()
-            elif player.upper() == 'Y':
-                yList[coord] = pieceName.lower()
-            else:
-                print ("Invalid testCase format expected 'x.K(5,6)' "), item
-                sys.exit()
-
-        return xList, yList
 ###############################################################################
 # Program execution here
 ###############################################################################
