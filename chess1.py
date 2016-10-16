@@ -9,7 +9,7 @@
 #  Most of these functions are resided in the GameRules class
 #
 ###############################################################################
-import os, sys, re, logging
+import os, sys, re, logging, chess
 import random, timeit
 
 class Brain(object):
@@ -1037,8 +1037,6 @@ class Rules(object):
     def mdistance(start, target):
         return abs(target[0] - start[0]) + abs(target[1] - start[1])
 
-        
-
 
 ###############################################################################
 # ChessGame class
@@ -1086,8 +1084,8 @@ class ChessGame(object):
         allPieces = {**self.players[0].chessPieces, **self.players[1].chessPieces}
 
         # a list of number from 1 to 8
-        boardHeader = ['*','1','2','3','4','5','6','7','8']
-        columnHeader = ['*','a','b','c','d','e','f','g','h']
+        boardHeader = ['*','a','b','c','d','e','f','g','h']
+        boardRow = ['*','1','2','3','4','5','6','7','8']
 
         tbspacer=' '*6
         rowspacer=' '*5
@@ -1096,7 +1094,7 @@ class ChessGame(object):
 
         dataLine = ''
         # print column numbering
-        for field in columnHeader:
+        for field in boardHeader:
             dataLine += empty + field + ' '
 
         print (dataLine)
@@ -1116,7 +1114,7 @@ class ChessGame(object):
             logging.info(dataLine)
 
             # Follow by the row numbering
-            dataLine = ' '*2 + boardHeader[row] + '  |'
+            dataLine = ' '*2 + boardRow[row] + '  |'
             for col in range(1,9):
                 # Check each coordinate at row, col
                 if (row, col) not in allPieces:
@@ -1140,24 +1138,43 @@ class ChessGame(object):
     def play(self, nTurns):
         gameWon = False
         gameTurns = 0
+        turnCount = 0
         # Draw the board
-        
         self.drawBoard()
+        f = open('output.txt','w')
 
         while gameTurns < nTurns:
             # Current Player Make the move
             success, move = self.players[self.curr].move()
 
             # Compute the total number of turns taken so far
+            turnCount += 1
+
             if self.curr == 0:
                 gameTurns += 1
 
             # Just print a message
-            #if  self.players[self.curr].name == 'PlayerXAI''
             msg = "Turn : " + str(gameTurns) + " : "
             msg += self.players[self.curr].name + " move " + move
+            
+            #output turn number
+            message = str(turnCount)
+            playerName = self.players[self.curr].name
+            playerName = re.sub('Player', '', playerName)
+            playerName = re.sub('AI', '', playerName)
+            x = int(move[2])
+            numberCoor = move[3]
+            letter= ['a','b','c','d','e','f','g','h']
+
+            letterCoor = letter[x-1]
+            currCoordinate = str(letterCoor) + numberCoor
+            message += " " + playerName +":" + ":" + currCoordinate +"\n"
+            #f.write(str(turnCount)) 
+            f.write(message)
+            
             print (msg)
             logging.info(msg)
+
 
             # Refresh the board after a move
             self.drawBoard()
@@ -1207,6 +1224,7 @@ class ChessGame(object):
 
         print (msg)
         logging.info(msg)
+        f.close()
         # Print out all moves
         # print self.gameMoves
         
@@ -1217,28 +1235,25 @@ class ChessGame(object):
 # playerY
 ###############################################################################
 def parseTestCase(line):
-    regexPattern = r'([0-9][0-9]\s[XY]\:[RNK]\:[a-h][1-8])'
+    regexPattern = r'([xy]\.[RK]\([1-8],[1-8]\))'
+    #regexPattern = r'([XY]\:[RKN]:([1-8],[1-8]\))'
     listPieces = re.findall(regexPattern, line)
+
     xList = {}
     yList = {}
-    
     for item in listPieces:
-            
-            # Item is expected to be in the format of 'x.K(5,6)'
-        player = item[3]
-        pieceName = item[5]
-        column = ord(item[7])-96
-        coord = ( column, int(item[8]) )
-        
-        # check if corrdinate is valid
+        # Item is expected to be in the format of 'x.K(5,6)'
+        player = item[0]
+        pieceName = item[2]
+        coord = ( int(item[4]), int(item[6]) )
         if (coord[0] < 1 or coord[0] > 8) and (coord[1] < 1 or coord[1] > 8):
             print ("Invalid coordinate from test File. "), item
             sys.exit()
-        #check if piece is valid
-        if pieceName.upper() not in ['K','R','N']:
+
+        if pieceName.upper() not in ['K','R']:
             print ("Invalid Piece Name "), item
             sys.exit()
-        # add piece to right list
+
         if player.upper() == 'X':
             xList[coord] = pieceName.upper()
         elif player.upper() == 'Y':
@@ -1246,48 +1261,8 @@ def parseTestCase(line):
         else:
             print ("Invalid testCase format expected 'x.K(5,6)' "), item
             sys.exit()
-        print(xList)
-    return xList,yList
-        #print(Dict(yList))
 
-    #--------------------------------------------------------------------------
-    # Helper function to read text file to get what opponent run
-    #--------------------------------------------------------------------------
-#def readTextFile(self, gameTurn):  
-    # if  self.players[self.curr].name == "PlayerXAI"
-    #     fileName = "log_Y.txt"
-    #     readMove = open(fileName)
-    #     ReadOponentMove(readMove[gameTurn])
-    # else
-    #     fileName = "log_X.txt"
-    #     readMove = open(fileName)
-
-#---------
-# helper fucntion to read the file and setn back the right type.    
-
-def ReadOponentMove(line):
-    regexPattern = r'([0-9][0-9]\s[XY]\:[RNK]\:[a-h][1-8])'
-    listPieces = re.findall(regexPattern, line)
-    opList = {}
-    
-    for item in listPieces:
-            
-            # Item is expected to be in the format of 'x.K(5,6)'
-        player = item[3]
-        pieceName = item[5]
-        column = ord(item[7])-96
-        coord = ( column, int(item[8]) )
-        
-        # check if corrdinate is valid
-        if (coord[0] < 1 or coord[0] > 8) and (coord[1] < 1 or coord[1] > 8):
-            print ("Invalid coordinate from test File. "), item
-            sys.exit()
-        #check if piece is valid
-        if pieceName.upper() not in ['K','R','N']:
-            print ("Invalid Piece Name "), item
-            sys.exit()
-        opList[coord] = pieceName.upper()
-    return opList
+    return xList, yList
 
 def setNumOfTurns():
     numInput = input("Enter the number of turns?: (Enter to default to 35 turns)")
@@ -1306,16 +1281,18 @@ def main():
     # xPieces = {(8,7):'K', (8,8):'R'}
     # yPieces = {(6,5):'k'}
 
+    
+
     # Setup a logging
     logging.basicConfig(filename='gameResult.txt', filemode='w', level=logging.INFO)
 
     answer = input("Is this a test? (y/n)") #renamed to input from raw_input
     if answer.upper() == 'Y':
-        fileName = "testCase2.txt"
+        fileName = "testCase.txt"
         testData = open(fileName)
         gameNum = 1
         for line in testData:                        
-            xPieces, yPieces = parseTestCase(line) 
+            xPieces, yPieces = parseTestCase(line)
             if len(xPieces) == 0 or len(yPieces) == 0:
                 print ("Problem with testCase data.  Unable to parse it")
                 print ("Expect testCase data in format: x.K(8,7),x.R(8,8),y.K(6,5)")
@@ -1333,7 +1310,6 @@ def main():
             msg += "-----------------------------"
             
             print (msg)
-
             logging.info(msg)
             
             newGame.play(nTurns)
@@ -1378,6 +1354,8 @@ def main():
         # Play it
         nTurns = setNumOfTurns()
         newGame.play(nTurns)
+
+
 
 ###############################################################################
 # Program execution here
