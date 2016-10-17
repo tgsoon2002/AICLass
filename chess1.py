@@ -12,6 +12,8 @@
 import os, sys, re, logging, chess
 import random, timeit
 
+xList = {}
+
 class Brain(object):
 
     #--------------------------------------------------------------------------
@@ -235,7 +237,7 @@ class HeuristicX(Brain):
     # Constructor
     #--------------------------------------------------------------------------
     def __init__(self):
-        self.MaxLevel = 4
+        self.MaxLevel = 3
         self.HeuristicType = "MIN"
 
     #--------------------------------------------------------------------------
@@ -386,7 +388,7 @@ class HeuristicY(Brain):
     # Constructor
     #--------------------------------------------------------------------------
     def __init__(self):
-        self.MaxLevel = 4
+        self.MaxLevel = 3
 
         # if set to MIN, then make sure heuristic Function return small number
         # if set to MAX, then make sure heuristic Function return large number
@@ -1163,14 +1165,21 @@ class ChessGame(object):
             playerName = re.sub('Player', '', playerName)
             playerName = re.sub('AI', '', playerName)
             x = int(move[2])
+            y = int(move[3])
             numberCoor = move[3]
+            
             letter= ['a','b','c','d','e','f','g','h']
 
             letterCoor = letter[x-1]
             currCoordinate = str(letterCoor) + numberCoor
-            message += " " + playerName +":" + ":" + currCoordinate +"\n"
+            message += " " + playerName +":"+ str.upper(self.players[self.curr].chessPieces[x,y])
+            message += ":" + currCoordinate +"\n"
+            #print in xList.items():
+            #message += str(self.players[self.curr].chessPieces[x,y]) + "\n"
+
+            #self.players[self.curr].chessPieces
             #f.write(str(turnCount)) 
-            f.write(message)
+            f.write(message) 
             
             print (msg)
             logging.info(msg)
