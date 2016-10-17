@@ -1087,7 +1087,7 @@ class ChessGame(object):
 
         # a list of number from 1 to 8
         boardHeader = ['*','a','b','c','d','e','f','g','h']
-        boardRow = ['*','1','2','3','4','5','6','7','8']
+        boardRow = ['*','8','7','6','5','4','3','2','1']
 
         tbspacer=' '*6
         rowspacer=' '*5
@@ -1166,12 +1166,12 @@ class ChessGame(object):
             playerName = re.sub('AI', '', playerName)
             x = int(move[2])
             y = int(move[3])
-            numberCoor = move[3]
+            numberCoor = 9- int(move[2])
             
             letter= ['a','b','c','d','e','f','g','h']
 
-            letterCoor = letter[x-1]
-            currCoordinate = str(letterCoor) + numberCoor
+            letterCoor = letter[y-1]
+            currCoordinate = str(letterCoor) + str(numberCoor)
             message += " " + playerName +":"+ str.upper(self.players[self.curr].chessPieces[x,y])
             message += ":" + currCoordinate +"\n"
             #print in xList.items():
@@ -1273,7 +1273,25 @@ def parseTestCase(line):
         else:
             print ("Invalid testCase format expected 'x.K(5,6)' "), item
             sys.exit()
+        print(xList)
     return xList,yList
+        #print(Dict(yList))
+
+    #--------------------------------------------------------------------------
+    # Helper function to read text file to get what opponent run
+    #--------------------------------------------------------------------------
+#def readTextFile(self, gameTurn):  
+    # if  self.players[self.curr].name == "PlayerXAI"
+    #     fileName = "log_Y.txt"
+    #     readMove = open(fileName)
+    #     ReadOponentMove(readMove[gameTurn])
+    # else
+    #     fileName = "log_X.txt"
+    #     readMove = open(fileName)
+
+#---------
+
+# helper fucntion to read the file and setn back the right type.    
 
 def ReadOponentMove(line):
     regexPattern = r'([0-9][0-9]\s[XY]\:[RNK]\:[a-h][1-8])'
@@ -1298,7 +1316,6 @@ def ReadOponentMove(line):
             sys.exit()
         opList[coord] = pieceName.upper()
     return opList
-
 
 def setNumOfTurns():
     numInput = input("Enter the number of turns?: (Enter to default to 35 turns)")
@@ -1325,6 +1342,8 @@ def main():
     answer = input("Is this a test? (y/n)") #renamed to input from raw_input
     if answer.upper() == 'Y':
         fileName = "testCase2.txt"
+        #fileName = "testCase.txt"
+
         testData = open(fileName)
         gameNum = 1
         for line in testData:                        
