@@ -9,8 +9,10 @@
 #  Most of these functions are resided in the GameRules class
 #
 ###############################################################################
-import os, sys, re, logging
+import os, sys, re, logging, chess
 import random, timeit
+
+xList = {}
 
 class Brain(object):
 
@@ -235,7 +237,7 @@ class HeuristicX(Brain):
     # Constructor
     #--------------------------------------------------------------------------
     def __init__(self):
-        self.MaxLevel = 4
+        self.MaxLevel = 3
         self.HeuristicType = "MIN"
 
     #--------------------------------------------------------------------------
@@ -386,7 +388,7 @@ class HeuristicY(Brain):
     # Constructor
     #--------------------------------------------------------------------------
     def __init__(self):
-        self.MaxLevel = 4
+        self.MaxLevel = 3
 
         # if set to MIN, then make sure heuristic Function return small number
         # if set to MAX, then make sure heuristic Function return large number
@@ -1037,8 +1039,6 @@ class Rules(object):
     def mdistance(start, target):
         return abs(target[0] - start[0]) + abs(target[1] - start[1])
 
-        
-
 
 ###############################################################################
 # ChessGame class
@@ -1086,8 +1086,8 @@ class ChessGame(object):
         allPieces = {**self.players[0].chessPieces, **self.players[1].chessPieces}
 
         # a list of number from 1 to 8
-        boardHeader = ['*','1','2','3','4','5','6','7','8']
-        columnHeader = ['*','a','b','c','d','e','f','g','h']
+        boardHeader = ['*','a','b','c','d','e','f','g','h']
+        boardRow = ['*','1','2','3','4','5','6','7','8']
 
         tbspacer=' '*6
         rowspacer=' '*5
@@ -1096,7 +1096,7 @@ class ChessGame(object):
 
         dataLine = ''
         # print column numbering
-        for field in columnHeader:
+        for field in boardHeader:
             dataLine += empty + field + ' '
 
         print (dataLine)
@@ -1116,7 +1116,7 @@ class ChessGame(object):
             logging.info(dataLine)
 
             # Follow by the row numbering
-            dataLine = ' '*2 + boardHeader[row] + '  |'
+            dataLine = ' '*2 + boardRow[row] + '  |'
             for col in range(1,9):
                 # Check each coordinate at row, col
                 if (row, col) not in allPieces:
@@ -1140,24 +1140,50 @@ class ChessGame(object):
     def play(self, nTurns):
         gameWon = False
         gameTurns = 0
+        turnCount = 0
         # Draw the board
-        
         self.drawBoard()
+        f = open('output.txt','w')
 
         while gameTurns < nTurns:
             # Current Player Make the move
             success, move = self.players[self.curr].move()
 
             # Compute the total number of turns taken so far
+            turnCount += 1
+
             if self.curr == 0:
                 gameTurns += 1
 
             # Just print a message
-            #if  self.players[self.curr].name == 'PlayerXAI''
             msg = "Turn : " + str(gameTurns) + " : "
             msg += self.players[self.curr].name + " move " + move
+            
+            #output turn number
+            message = str(turnCount)
+            playerName = self.players[self.curr].name
+            playerName = re.sub('Player', '', playerName)
+            playerName = re.sub('AI', '', playerName)
+            x = int(move[2])
+            y = int(move[3])
+            numberCoor = move[3]
+            
+            letter= ['a','b','c','d','e','f','g','h']
+
+            letterCoor = letter[x-1]
+            currCoordinate = str(letterCoor) + numberCoor
+            message += " " + playerName +":"+ str.upper(self.players[self.curr].chessPieces[x,y])
+            message += ":" + currCoordinate +"\n"
+            #print in xList.items():
+            #message += str(self.players[self.curr].chessPieces[x,y]) + "\n"
+
+            #self.players[self.curr].chessPieces
+            #f.write(str(turnCount)) 
+            f.write(message) 
+            
             print (msg)
             logging.info(msg)
+
 
             # Refresh the board after a move
             self.drawBoard()
@@ -1207,6 +1233,7 @@ class ChessGame(object):
 
         print (msg)
         logging.info(msg)
+        f.close()
         # Print out all moves
         # print self.gameMoves
         
@@ -1246,24 +1273,7 @@ def parseTestCase(line):
         else:
             print ("Invalid testCase format expected 'x.K(5,6)' "), item
             sys.exit()
-        print(xList)
     return xList,yList
-        #print(Dict(yList))
-
-    #--------------------------------------------------------------------------
-    # Helper function to read text file to get what opponent run
-    #--------------------------------------------------------------------------
-#def readTextFile(self, gameTurn):  
-    # if  self.players[self.curr].name == "PlayerXAI"
-    #     fileName = "log_Y.txt"
-    #     readMove = open(fileName)
-    #     ReadOponentMove(readMove[gameTurn])
-    # else
-    #     fileName = "log_X.txt"
-    #     readMove = open(fileName)
-
-#---------
-# helper fucntion to read the file and setn back the right type.    
 
 def ReadOponentMove(line):
     regexPattern = r'([0-9][0-9]\s[XY]\:[RNK]\:[a-h][1-8])'
@@ -1289,6 +1299,7 @@ def ReadOponentMove(line):
         opList[coord] = pieceName.upper()
     return opList
 
+
 def setNumOfTurns():
     numInput = input("Enter the number of turns?: (Enter to default to 35 turns)")
     if len(numInput) > 0 and numInput.isdigit():
@@ -1306,6 +1317,8 @@ def main():
     # xPieces = {(8,7):'K', (8,8):'R'}
     # yPieces = {(6,5):'k'}
 
+    
+
     # Setup a logging
     logging.basicConfig(filename='gameResult.txt', filemode='w', level=logging.INFO)
 
@@ -1315,7 +1328,7 @@ def main():
         testData = open(fileName)
         gameNum = 1
         for line in testData:                        
-            xPieces, yPieces = parseTestCase(line) 
+            xPieces, yPieces = parseTestCase(line)
             if len(xPieces) == 0 or len(yPieces) == 0:
                 print ("Problem with testCase data.  Unable to parse it")
                 print ("Expect testCase data in format: x.K(8,7),x.R(8,8),y.K(6,5)")
@@ -1333,7 +1346,6 @@ def main():
             msg += "-----------------------------"
             
             print (msg)
-
             logging.info(msg)
             
             newGame.play(nTurns)
@@ -1378,6 +1390,8 @@ def main():
         # Play it
         nTurns = setNumOfTurns()
         newGame.play(nTurns)
+
+
 
 ###############################################################################
 # Program execution here
