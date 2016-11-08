@@ -7,6 +7,7 @@ class Rules(object):
     def isValidMove(myPieces, opponentPieces, startCoor, targetCoor):
         # Make sure we are moving a piece that we own and it does not
         # attack another piece of our own
+
         if startCoor in myPieces and targetCoor not in myPieces:
             # Get the piece name
             selectedPiece = myPieces.get(startCoor)
@@ -40,7 +41,7 @@ class Rules(object):
             del opponentPieces[targetCoor]
 
         return myPieces, opponentPieces
- #--------------------//Validate too see if move is follow rules//------
+    #--------------------//Validate too see if move is follow rules//------
     #--------------------------------------------------------------------------
     # Helper Function to check King legal move
     #--------------------------------------------------------------------------
@@ -54,13 +55,17 @@ class Rules(object):
     # Helper Function to check King legal move
     #--------------------------------------------------------------------------
     @staticmethod
-    def checkKnight(myPieces, opponentPieces, startCoor, target):
-        # King can move one square in any direction
+    def checkKnight(myPieces, opponentPieces, startCoor, targetCoor):
+        print (targetCoor)
+        print("here3")
         if abs(targetCoor[0]-startCoor[0]) == 1 and abs(targetCoor[1]-startCoor[1]) == 2:
+            print("x1")
             if Rules.KnightHasLOS(myPieces, opponentPieces, startCoor, targetCoor):
                 return True
         elif abs(targetCoor[0]-startCoor[0]) == 2 and abs(targetCoor[1]-startCoor[1]) == 1:
+            print("x2")
             if Rules.KnightHasLOS(myPieces, opponentPieces, startCoor, targetCoor):
+                print("x3")
                 return True
 
     #--------------------------------------------------------------------------
@@ -73,12 +78,22 @@ class Rules(object):
         # check if coord is out of bound
         # then check if target is occupy by our pieces
         # then check if target is occupy by foe pieces 
+        print("LOS")
         if targetCoor[0] >= 1 and targetCoor[0] <= 8 and targetCoor[1] >= 1 and targetCoor[1] <= 8:
+            print ("innn")
+            print (targetCoor)
+            print (myPieces)
+            print (opponentPieces)
             if targetCoor in myPieces:
+                print("444")
                 return False
             elif targetCoor in opponentPieces:
+                print("666")
+                return True
+            else:
                 return True
         else :
+            print("555")
             return False
 
     #--------------------------------------------------------------------------
@@ -240,6 +255,8 @@ class Rules(object):
     #--------------------------------------------------------------------------
     @staticmethod
     def isLOSWithRook(start, between, target):
+        print(start)
+        print(target)
         if start == target:
             # The coordinate is the same, with rook, which mean we capture
             # and hence not LOS
